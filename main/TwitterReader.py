@@ -48,18 +48,17 @@ class TweetListener(StreamListener):
 	#This is a basic listener that just prints received tweets to standard output
 	def __init__(self, outputfile):
 		self.output_stream =  outputfile
-
+		self.sentimentUtil = SentimentUtil()
 		# We load in the list of words and their log probabilities
 		self.happy_log_probs, self.sad_log_probs = readSentimentList('twitter_sentiment_list.csv')
 
 	def on_data(self, data):
 		try:
-			tweet = json.loads(data)['text']
-			created_at = json.loads(data)['created_at']
-			# tweet_happy_prob, tweet_sad_prob = classifySentiment(tweet.split(), self.happy_log_probs, self.sad_log_probs)
-			# print (tweet +"\nhappy probability: " +tweet_happy_prob +"\nsad probability: " +tweet_sad_prob +"\n\n")
-			# self.output_stream.write(tweet+"\n")# +"\nhappy probability: " +str(tweet_happy_prob) +"\nsad probability: "+str(tweet_sad_prob) +"\n\n")
-			print "["+created_at +"]\t" +tweet +"\n"
+			tweet_raw = json.loads(data)['text']
+			# created_at = json.loads(data)['created_at']
+			sentiment = sentimentUtil.sendTweet(tweet_raw)
+
+			# print "["+created_at +"]\t" +tweet +"\n"
 			# blob = TextBlob(tweet, analyzer=NaiveBayesAnalyzer())
 			# self.output_stream.write("["+created_at +"]\t" +tweet +"\n")# +str(blob.sentiment) +"\n\n")
 			# self.output_stream.flush()
