@@ -28,3 +28,5 @@ class ParseANEW:
 			a_stats.append(a_stat['arousal-SD'])
 			return a_stats
 		return None
+
+

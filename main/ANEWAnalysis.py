@@ -7,6 +7,7 @@ class ANEWAnalysis:
 		self.means 	= []
 		self.sds 	= []
 		self.p_vals	= []
+		self.sentiment = None
 	
 	def addTuple(self, mean, sd):
 		self.means.append(mean)
@@ -17,17 +18,25 @@ class ANEWAnalysis:
 		
 	def computeSentiment(self):
 
-		print self.means, self.sds,self.p_vals
-		weights = []
-		p_sum	= sum(self.p_vals)
+		# print self.means, self.sds,self.p_vals
 
-		for i in range(len(self.p_vals)):
-			weights.append(self.p_vals[i]/p_sum)
-		
-		print weights
+		if self.sentiment == None:
+			weights = []
+			p_sum	= sum(self.p_vals)
 
-		sentiment = 0
-		for i in range(len(weights)):
-			sentiment += (weights[i] * self.means[i])
+			for i in range(len(self.p_vals)):
+				weights.append(self.p_vals[i]/p_sum)
 			
-		return sentiment
+			# print weights
+
+			self.sentiment = 0
+			for i in range(len(weights)):
+				self.sentiment += (weights[i] * self.means[i])
+
+	def getSentiment(self):
+		if self.sentiment == None:
+			self.computeSentiment()
+
+		if self.sentiment != None:
+			return self.sentiment
+			
