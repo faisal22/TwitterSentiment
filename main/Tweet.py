@@ -50,4 +50,4 @@ class Tweet:
 				print 'stats found for : '+stem
 
 	def __str__(self):
-		return self.tweet_raw +'\nValence: '+str(self.valenceAnalyzer.getSentiment()) +' | Arousal: '+str(self.arousalAnalyzer.getSentiment())
+		return self.tweet_raw +'\nValence: '+str(self.valenceAnalyzer.getNormalizedSentiment()) +' | Arousal: '+str(self.arousalAnalyzer.getNormalizedSentiment())

@@ -39,4 +39,8 @@ class ANEWAnalysis:
 
 		if self.sentiment != None:
 			return self.sentiment
-			
+
+	def getNormalizedSentiment:
+		sentiment = self.getSentiment()
+		return (sentiment - NORM_LOW)/(NORM_HI-NORM_LOQ)
+

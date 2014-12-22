@@ -50,7 +50,7 @@ class TweetListener(StreamListener):
 	def __init__(self, outputfile):
 		self.output_stream =  outputfile
 		# We load in the list of words and their log probabilities
-		self.happy_log_probs, self.sad_log_probs = readSentimentList('twitter_sentiment_list.csv')
+		# self.happy_log_probs, self.sad_log_probs = readSentimentList('twitter_sentiment_list.csv')
 		self.tweetHandler = TweetHandler()
 
 	def on_data(self, data):
