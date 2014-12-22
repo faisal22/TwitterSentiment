@@ -56,6 +56,7 @@ class TweetListener(StreamListener):
 	def on_data(self, data):
 		try:
 			tweet_raw = json.loads(data)['text']
+			print '.'
 			# created_at = json.loads(data)['created_at']
 			self.tweetHandler.handleTweet(tweet_raw)
 

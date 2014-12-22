@@ -8,6 +8,9 @@ class ANEWAnalysis:
 		self.sds 	= []
 		self.p_vals	= []
 		self.sentiment = None
+
+		self.NORM_LOW = 1
+		self.NORM_HI = 9
 	
 	def addTuple(self, mean, sd):
 		self.means.append(mean)
@@ -40,7 +43,8 @@ class ANEWAnalysis:
 		if self.sentiment != None:
 			return self.sentiment
 
-	def getNormalizedSentiment:
+	def getNormalizedSentiment(self):
 		sentiment = self.getSentiment()
-		return (sentiment - NORM_LOW)/(NORM_HI-NORM_LOQ)
+		return sentiment
+		# return (sentiment - self.NORM_LOW)/(self.NORM_HI-self.NORM_LOW)
 
