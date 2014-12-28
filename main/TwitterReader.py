@@ -8,12 +8,6 @@ from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
 from TweetHandler import TweetHandler
 
-#setting up the keys
-consumer_key 	= 'euSriOE9VFoHkbC0ZiXGgKkN4'
-consumer_secret = 'iB791h3YZP60dDoKPVcj0HKNGKCVoG1aYapUZd8rIK5ozSMoLs'
-access_token 	= '179897744-aUOSCU3B77TnnDGkKOoyvPn5KKYbMStZTaT9o2Jb'
-access_secret 	= 'aDSsCFIFhY3iUpvuGDHNX30FRQXI3GqssfaN7Wh2gGgNI'
-
 def readSentimentList(file_name):
 	ifile = open(file_name, 'r')
 	happy_log_probs = {}
@@ -54,47 +48,98 @@ class TweetListener(StreamListener):
 		self.tweetHandler = TweetHandler()
 
 	def on_data(self, data):
-		try:
-			tweet_raw = json.loads(data)['text']
-			print '.'
-			# created_at = json.loads(data)['created_at']
-			self.tweetHandler.handleTweet(tweet_raw)
+		# try:
+		tweet_raw = json.loads(data)['text']
+		# print '.'
+		created_at = json.loads(data)['created_at']
+		# self.tweetHandler.handleTweet(tweet_raw)
 
-			# print "["+created_at +"]\t" +tweet +"\n"
-			# blob = TextBlob(tweet, analyzer=NaiveBayesAnalyzer())
-			# self.output_stream.write("["+created_at +"]\t" +tweet +"\n")# +str(blob.sentiment) +"\n\n")
-			# self.output_stream.flush()
-		except Exception as ex:
-			print ex
+		print "["+created_at +"]\t" +tweet_raw+"\n"
+		# blob = TextBlob(tweet, analyzer=NaiveBayesAnalyzer())
+		self.output_stream.write("["+created_at +"]\t" +tweet_raw +"\n")# +str(blob.sentiment) +"\n\n")
+		self.output_stream.flush()
+		# except Exception as ex:
+		# 	print ex
 		return True
 
 	def on_error(self, status):
 		print status
+		return False
 
-	def __getattr__(self, attr):
-         return getattr(output_stream, attr)
 
-def start_stream():
-	now = datetime.datetime.now()
-	LOG_DIRNAME		= '.\\logs\\'
-	LOG_FILENAME 	= 'twitterdata' +str(now.year) +str(now.month) +str(now.day) +str(now.hour) +str(now.minute) +'.data'
-	if not os.path.exists(LOG_DIRNAME):
-		os.makedirs(LOG_DIRNAME)
-	
-	while True:
-		try:		
-			stream = Stream(auth, TweetListener(open(LOG_DIRNAME+LOG_FILENAME, 'w')))
-			stream.filter(locations =  USA_LOCATIONS, track = FEEL_WORDS)
-		except KeyboardInterrupt as e:
-			sys.exit()		
-		except Exception as ex:
-			print ex
-			continue
+class TweetConnection:
+	def __init__(self):
 
-#	http://boundingbox.klokantech.com/
-USA_LOCATIONS = [-125.18,25.52,-58.94,48.98]
-FEEL_WORDS = ['feel', 'makes me', 'I\'m', 'I am', 'im', 'i am', 'feeling', 'feelings', 'love', 'hate', 'anxiety', 'anxious']
+		print('initializing variables.....'),
+		#setting up the keys
+		self.consumer_key 	= 'euSriOE9VFoHkbC0ZiXGgKkN4'
+		self.consumer_secret = 'iB791h3YZP60dDoKPVcj0HKNGKCVoG1aYapUZd8rIK5ozSMoLs'
+		self.access_token 	= '179897744-aUOSCU3B77TnnDGkKOoyvPn5KKYbMStZTaT9o2Jb'
+		self.access_secret 	= 'aDSsCFIFhY3iUpvuGDHNX30FRQXI3GqssfaN7Wh2gGgNI'
 
-auth = OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_secret)
-start_stream()
+		# http://boundingbox.klokantech.com/
+		self.USA_LOCATIONS = [-125.18,25.52,-58.94,48.98]
+		self.FEEL_WORDS = ['feel', 'makes me', 'I\'m', 'I am', 'im', 'i am', 'feeling', 'feelings', 'love', 'hate', 'anxiety', 'anxious']
+		printGreen('successful')
+		print('consumer key: '+self.consumer_key)
+		print('consumer secret: '+self.consumer_secret)
+		print('access token: '+self.access_token)
+		print('access secret: '+self.access_secret)
+		print('locations to track: '+str(self.USA_LOCATIONS))
+		print('words to track: '+str(self.FEEL_WORDS))
+
+	def initAuth(self):
+		print('authorizing.....'),
+		self.auth = OAuthHandler(self.consumer_key, self.consumer_secret)
+		self.auth.set_access_token(self.access_token, self.access_secret)
+		printGreen('successful')
+
+	def initLogDir(self):
+		print('initializing log directory.....'),
+		now = datetime.datetime.now()
+		self.LOG_DIRNAME		= '.\\logs\\'
+		self.LOG_FILENAME 	= 'twitterdata' +str(now.year) +str(now.month) +str(now.day) +str(now.hour) +str(now.minute) +'.data'
+		if not os.path.exists(self.LOG_DIRNAME):
+			os.makedirs(self.LOG_DIRNAME)
+		printGreen('successful')
+
+	def start(self):
+		while True:	
+			try:		
+				stream = Stream(self.auth, TweetListener(open(self.LOG_DIRNAME+self.LOG_FILENAME, 'w')))
+				stream.filter(locations =  self.USA_LOCATIONS, track = self.FEEL_WORDS)
+			except KeyboardInterrupt as e:
+				sys.exit()		
+			except Exception as ex:
+				print ex
+				continue
+
+# http://en.wikipedia.org/wiki/ANSI_escape_code
+def printRed(text):
+	CSI="\x1B["
+	print CSI+"31;40m" +text + CSI + "0m"
+
+def printGreen(text):
+	CSI="\x1B["
+	print CSI+"32;40m" +text + CSI + "0m"	
+
+def main():
+	try:
+		tc = TweetConnection()
+		tc.initAuth()
+	except Exception as e:
+		print 'failed'
+		print e
+		sys.exit()
+	try:
+		tc.initLogDir()
+	except Exception as e:
+		printRed('failed')
+		print e
+		sys.exit()
+	s = raw_input('\npress enter to continue.....')
+	if(len(s)==0):
+		print 'starting stream.....\n'
+		tc.start()
+
+main()

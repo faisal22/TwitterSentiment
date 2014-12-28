@@ -1,13 +1,12 @@
-import re, enchant
+import re, enchant, os
 from ParseANEW import ParseANEW
 from nltk.stem.wordnet import WordNetLemmatizer
 from ANEWAnalysis import ANEWAnalysis
 
 class Tweet:
-
 	def __init__(self, tweet_raw):
 		self.parseAnew = ParseANEW()
-		self.parseAnew.parse('anew.csv')
+		self.parseAnew.parse('./main/anew.csv')
 		self.dict 	   = enchant.Dict('en_US')
 		self.lmtzr 	   = WordNetLemmatizer()
 		self.tweet_raw = tweet_raw
@@ -51,3 +50,11 @@ class Tweet:
 
 	def __str__(self):
 		return self.tweet_raw +'\nValence: '+str(self.valenceAnalyzer.getNormalizedSentiment()) +' | Arousal: '+str(self.arousalAnalyzer.getNormalizedSentiment())
+
+
+# def main():
+# 	t = Tweet('hi my name is faisal')
+# 	t.compute()
+# 	print t
+
+# main()
