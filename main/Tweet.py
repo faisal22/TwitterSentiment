@@ -51,6 +51,12 @@ class Tweet:
 	def __str__(self):
 		return self.tweet_raw +'\nValence: '+str(self.valenceAnalyzer.getNormalizedSentiment()) +' | Arousal: '+str(self.arousalAnalyzer.getNormalizedSentiment())
 
+	def getValence(self):
+		return self.valenceAnalyzer.getNormalizedSentiment()
+
+	def getArousal(self):
+		return self.arousalAnalyzer.getNormalizedSentiment()
+
 
 # def main():
 # 	t = Tweet('hi my name is faisal')

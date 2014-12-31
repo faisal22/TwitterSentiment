@@ -7,7 +7,6 @@ class TweetHandler:
 	
 
 	def handleTweet(self, tweet_raw):
-		# print 'received:' +tweet_raw
 		t = Tweet(tweet_raw)
 		self.tweet_BUFFER.put(t)
 		if not self.tweet_BUFFER.empty():
@@ -15,5 +14,4 @@ class TweetHandler:
 			self.dispatch(nextTweet)
 
 	def dispatch(self, tweet):
-		# print 'twitter handler calling dispatch'
 		tweet.compute()

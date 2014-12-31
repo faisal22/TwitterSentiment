@@ -2,11 +2,13 @@
 from tweepy import Stream
 from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
-import json,sys,datetime,os
+import json,sys,datetime,os,time,traceback
 import numpy as np
 from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
 from TweetHandler import TweetHandler
+from Tweet import Tweet
+from threading import Thread
 
 def readSentimentList(file_name):
 	ifile = open(file_name, 'r')
@@ -41,25 +43,32 @@ class TweetListener(StreamListener):
 
 	# A listener handles tweets are the received from the stream.
 	#This is a basic listener that just prints received tweets to standard output
-	def __init__(self, outputfile):
+	def __init__(self, outputfile, sentimentGraph):
 		self.output_stream =  outputfile
+		self.sentimentGraph = sentimentGraph
 		# We load in the list of words and their log probabilities
 		# self.happy_log_probs, self.sad_log_probs = readSentimentList('twitter_sentiment_list.csv')
 		self.tweetHandler = TweetHandler()
 
 	def on_data(self, data):
-		# try:
-		tweet_raw = json.loads(data)['text']
-		# print '.'
-		created_at = json.loads(data)['created_at']
-		# self.tweetHandler.handleTweet(tweet_raw)
+		try:
+			keys = json.loads(data).keys()
+			if('text' in keys and 'created_at' in keys):
+				tweet_raw = json.loads(data)['text']
 
-		print "["+created_at +"]\t" +tweet_raw+"\n"
-		# blob = TextBlob(tweet, analyzer=NaiveBayesAnalyzer())
-		self.output_stream.write("["+created_at +"]\t" +tweet_raw +"\n")# +str(blob.sentiment) +"\n\n")
-		self.output_stream.flush()
-		# except Exception as ex:
-		# 	print ex
+				created_at = json.loads(data)['created_at']
+				t = Tweet(tweet_raw)
+				t.compute()
+
+				self.sentimentGraph.plot(t.getValence(), t.getArousal(), tweet_raw)
+
+				# print "["+created_at +"]\t" +tweet_raw+"\n"
+
+	 			# blob = TextBlob(tweet, analyzer=NaiveBayesAnalyzer())
+				# self.output_stream.write("["+created_at +"]\t" +tweet_raw +"\n")# +str(blob.sentiment) +"\n\n")
+				# self.output_stream.flush()
+		except UnicodeEncodeError as uee:
+			None
 		return True
 
 	def on_error(self, status):
@@ -67,8 +76,8 @@ class TweetListener(StreamListener):
 		return False
 
 
-class TweetConnection:
-	def __init__(self):
+class TweetConnection():
+	def __init__(self, sentimentGraph):
 
 		print('initializing variables.....'),
 		#setting up the keys
@@ -76,6 +85,7 @@ class TweetConnection:
 		self.consumer_secret = 'iB791h3YZP60dDoKPVcj0HKNGKCVoG1aYapUZd8rIK5ozSMoLs'
 		self.access_token 	= '179897744-aUOSCU3B77TnnDGkKOoyvPn5KKYbMStZTaT9o2Jb'
 		self.access_secret 	= 'aDSsCFIFhY3iUpvuGDHNX30FRQXI3GqssfaN7Wh2gGgNI'
+		self.sentimentGraph = sentimentGraph
 
 		# http://boundingbox.klokantech.com/
 		self.USA_LOCATIONS = [-125.18,25.52,-58.94,48.98]
@@ -106,13 +116,15 @@ class TweetConnection:
 	def start(self):
 		while True:	
 			try:		
-				stream = Stream(self.auth, TweetListener(open(self.LOG_DIRNAME+self.LOG_FILENAME, 'w')))
+				stream = Stream(self.auth, TweetListener(open(self.LOG_DIRNAME+self.LOG_FILENAME, 'w'), self.sentimentGraph))
 				stream.filter(locations =  self.USA_LOCATIONS, track = self.FEEL_WORDS)
 			except KeyboardInterrupt as e:
-				sys.exit()		
+				sys.exit()	
 			except Exception as ex:
-				print ex
-				continue
+				traceback.print_exc(file=sys.stdout)
+			printRed('something happened. going to sleep.')	
+			time.sleep(5)
+			printRed('creating Stream object...')
 
 # http://en.wikipedia.org/wiki/ANSI_escape_code
 def printRed(text):
@@ -123,23 +135,27 @@ def printGreen(text):
 	CSI="\x1B["
 	print CSI+"32;40m" +text + CSI + "0m"	
 
-def main():
-	try:
-		tc = TweetConnection()
-		tc.initAuth()
-	except Exception as e:
-		print 'failed'
-		print e
-		sys.exit()
-	try:
-		tc.initLogDir()
-	except Exception as e:
-		printRed('failed')
-		print e
-		sys.exit()
-	s = raw_input('\npress enter to continue.....')
-	if(len(s)==0):
-		print 'starting stream.....\n'
-		tc.start()
+class TweetConnectionThread(Thread):
 
-main()
+	def __init__(self, sentimentGraph):
+		self.sentimentGraph = sentimentGraph
+		Thread.__init__(self)
+
+	def run(self):
+		try:
+			tc = TweetConnection(self.sentimentGraph)
+			tc.initAuth()
+		except Exception as e:
+			printRed('failed')
+			print e
+			sys.exit()
+		try:
+			tc.initLogDir()
+		except Exception as e:
+			printRed('failed')
+			print e
+			sys.exit()
+		s = raw_input('\npress enter to continue.....')
+		if(len(s)==0):
+			print 'starting stream.....\n'
+			tc.start()
