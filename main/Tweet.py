@@ -11,6 +11,7 @@ class Tweet:
 		self.lmtzr 	   = WordNetLemmatizer()
 		self.tweet_raw = tweet_raw
 		self.numDictWords = 0
+		self.used_words = []
 
 		self.valenceAnalyzer = ANEWAnalysis()
 		self.arousalAnalyzer = ANEWAnalysis()
@@ -25,7 +26,9 @@ class Tweet:
 		for i in range(len(tweet_tokens)):
 			self.dictFilter(tweet_tokens[i].strip())
 
-		if(self.numDictWords>=2):
+		if(self.numDictWords >= 2):
+			print('computing sentiments ' +str(self.numDictWords))
+			print self.used_words
 			self.valenceAnalyzer.computeSentiment()
 			self.arousalAnalyzer.computeSentiment()
 			print str(self)+'\n'
@@ -39,13 +42,18 @@ class Tweet:
 			stem = word
 			v_stats = self.parseAnew.getValence(stem)
 			if(v_stats != None):
+				print 'has v_ stats'
 				self.valenceAnalyzer.addTuple(v_stats[0], v_stats[1])
 
 			a_stats = self.parseAnew.getArousal(stem)
 			if(a_stats != None):
+				print 'has a_stats'
 				self.arousalAnalyzer.addTuple(a_stats[0], a_stats[1])
-			if(a_stats != None and v_stats != None):
+
+			if(a_stats != None and v_stats != None and self.isWordUsed(stem) == False):
 				self.numDictWords = self.numDictWords + 1
+				self.used_words.append(stem)
+				print('used word added: ' +str(self.used_words))
 				print 'stats found for : '+stem
 
 	def __str__(self):
@@ -56,6 +64,14 @@ class Tweet:
 
 	def getArousal(self):
 		return self.arousalAnalyzer.getNormalizedSentiment()
+
+	def getRaw(self):
+		return self.tweet_raw
+
+	def isWordUsed(self, word):
+		if word in self.used_words:
+			return True
+		return False
 
 
 # def main():

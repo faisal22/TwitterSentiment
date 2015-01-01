@@ -3,6 +3,7 @@ import matplotlib.pyplot
 class SentimentGraph:
 
 	def __init__(self):
+		print('initializing graph variables.....'),
 		self.plt = matplotlib.pyplot	
 
 		self.fig = self.plt.figure()
@@ -10,8 +11,10 @@ class SentimentGraph:
 
 		on_move_id = self.fig.canvas.mpl_connect('motion_notify_event', self.on_move)
 		self.points_with_annotation = []
+		printGreen('successful')
 
 	def setProperties(self):
+		print('setting graph properties.....'),
 		self.plt.axhline(y=5, color = 'black', linewidth = 3)
 		self.plt.axvline(x=5, color = 'black', linewidth = 3)
 		self.plt.grid(True)
@@ -41,20 +44,21 @@ class SentimentGraph:
 		self.plt.text(6.6, 1.4, 'Relaxed', bbox={'facecolor':'red', 'alpha':0.5})
 		self.plt.text(7.4, 1.8, 'Serene', bbox={'facecolor':'red', 'alpha':0.5})
 		self.plt.text(8.2, 2.6, 'Contented', bbox={'facecolor':'red', 'alpha':0.5})
+		printGreen('successful')
 
 	def startGraph(self):
+		print('starting graph\n')
 		self.plt.show(block=True) #this cause the mainloop
 
 	def plot(self, x, y, tweet_raw):
 		point = self.plt.scatter(x,y)
 		self.plt.draw()
 
-		annotation = self.ax.annotate(tweet_raw, xy=(x,y), xycoords='data', xytext=(x, y+0.2), textcoords='data', horizontalalignment="left", bbox=dict(boxstyle="round", facecolor="w", edgecolor="0.5", alpha=0.7))
+		annotation = self.ax.annotate(tweet_raw, xy=(x,y), xycoords='data', xytext=(x, y+0.2), textcoords='data', horizontalalignment="left", bbox=dict(boxstyle="round", facecolor="y", edgecolor="0.5", alpha=0.7))
 	    
-		# print annotation
-
 	    # by default, disable the annotation visibility
 		annotation.set_visible(False)
+
 		self.points_with_annotation.append([point, annotation])
 
 
@@ -67,9 +71,17 @@ class SentimentGraph:
 		        visibility_changed = True
 		        annotation.set_visible(should_be_visible)
 
-			# if visibility_changed:        
-			# 	self.plt.draw()
+				# if visibility_changed:        
+				# 	self.plt.draw()
 
+# http://en.wikipedia.org/wiki/ANSI_escape_code
+def printRed(text):
+	CSI="\x1B["
+	print CSI+"31;40m" +text + CSI + "0m"
+
+def printGreen(text):
+	CSI="\x1B["
+	print CSI+"32;40m" +text + CSI + "0m"
 
 
 # def main():

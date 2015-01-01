@@ -45,10 +45,9 @@ class TweetListener(StreamListener):
 	#This is a basic listener that just prints received tweets to standard output
 	def __init__(self, outputfile, sentimentGraph):
 		self.output_stream =  outputfile
-		self.sentimentGraph = sentimentGraph
 		# We load in the list of words and their log probabilities
 		# self.happy_log_probs, self.sad_log_probs = readSentimentList('twitter_sentiment_list.csv')
-		self.tweetHandler = TweetHandler()
+		self.tweetHandler = TweetHandler(sentimentGraph)
 
 	def on_data(self, data):
 		try:
@@ -57,10 +56,12 @@ class TweetListener(StreamListener):
 				tweet_raw = json.loads(data)['text']
 
 				created_at = json.loads(data)['created_at']
-				t = Tweet(tweet_raw)
-				t.compute()
 
-				self.sentimentGraph.plot(t.getValence(), t.getArousal(), tweet_raw)
+				self.tweetHandler.handleTweet(tweet_raw)
+				# t = Tweet(tweet_raw)
+				# t.compute()
+
+				# self.sentimentGraph.plot(t.getValence(), t.getArousal(), tweet_raw)
 
 				# print "["+created_at +"]\t" +tweet_raw+"\n"
 
@@ -79,7 +80,7 @@ class TweetListener(StreamListener):
 class TweetConnection():
 	def __init__(self, sentimentGraph):
 
-		print('initializing variables.....'),
+		print('initializing connection variables.....'),
 		#setting up the keys
 		self.consumer_key 	= 'euSriOE9VFoHkbC0ZiXGgKkN4'
 		self.consumer_secret = 'iB791h3YZP60dDoKPVcj0HKNGKCVoG1aYapUZd8rIK5ozSMoLs'

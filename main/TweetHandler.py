@@ -2,8 +2,9 @@ from Queue import Queue
 from Tweet import Tweet
 
 class TweetHandler:
-	def __init__(self):
+	def __init__(self, sentimentGraph):
 		self.tweet_BUFFER = Queue()
+		self.sentimentGraph = sentimentGraph
 	
 
 	def handleTweet(self, tweet_raw):
@@ -15,3 +16,4 @@ class TweetHandler:
 
 	def dispatch(self, tweet):
 		tweet.compute()
+		self.sentimentGraph.plot(tweet.getValence(), tweet.getArousal(), tweet.getRaw())
